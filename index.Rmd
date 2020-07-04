@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(lubridate)
+library(tidyverse)
+library(rvest)
+```
+
+[NOAA Storm Events](https://www.ncdc.noaa.gov/stormevents/ftp.jsp)
+
+```{r, results='hide'}
+url <- "https://www1.ncdc.noaa.gov/pub/data/swdi/stormevents/csvfiles/"
+page <- read_html(url)
+
+if(!file.exists("data")){
+        dir.create("data")}
+setwd("./data")
+g <- page %>% html_nodes(xpath = "//a")
+gg<-g[-c(1:8)]
+head(gg)
+
+gg<-gsub("<a.*gz.>", "", gg)
+
+gg<-gsub("</a>","",gg)
+gg <- gg[-c(72:215)]
+gg<-paste0(url,gg)
+tail(gg)
+lapply(gg, function(x) download.file(x,  basename(x)))
+
+```
+ 
+```{r}
+wd<-getwd()
+setwd(wd)
+```
+ 
+
+```{r}
+files <- list.files("./data", full.names = TRUE)
+files1<- lapply(files, read.csv)
+dff1 <- do.call(rbind, files1)
+rm(files1, files)
+```
+
+
+```{r}
+noaadf <- dff1
+```
